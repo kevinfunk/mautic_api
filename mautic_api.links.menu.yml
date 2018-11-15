@@ -1,0 +1,5 @@
+mautic_api.settings:
+  title: 'Mautic API settings'
+  parent: system.admin_config_services
+  description: 'Mautic API settings page.'
+  route_name: mautic_api.settings

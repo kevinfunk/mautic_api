@@ -1,0 +1,5 @@
+name: Mautic API
+type: module
+description: Provides integration with the mautic php api.
+core: 8.x
+package: Other

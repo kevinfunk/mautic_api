@@ -1,0 +1,14 @@
+{
+    "name": "drupal/mautic_api",
+    "description": "Provides integration with the mautic api library.",
+    "type": "drupal-module",
+    "require": {
+        "mautic/api-library": "^2.14"
+    },
+    "authors": [
+        {
+            "name": "archnode",
+            "email": "markus@signalonline.at"
+        }
+    ]
+}

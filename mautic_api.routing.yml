@@ -1,0 +1,9 @@
+mautic_api.settings:
+  path: '/admin/config/services/mautic-api'
+  defaults:
+    _form: 'Drupal\mautic_api\Form\MauticApiSettingsForm'
+    _title: 'Mautic API settings'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _permission: 'administer mautic api'
