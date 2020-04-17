@@ -10,6 +10,14 @@ namespace Drupal\mautic_api;
 interface MauticApiServiceInterface {
 
   /**
+   * Gets username/password for mautic api call.
+   *
+   * @return array
+   *   Array with 'username' and 'password' as keys.
+   */
+  public function getCredentials();
+
+  /**
    * @param string $email
    * @param array $data
    *

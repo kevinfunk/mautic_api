@@ -5,9 +5,41 @@ mautic_api.settings:
     base_url:
       type: string
       label: 'Base url'
-    basic_auth_username:
+    credential_provider:
       type: string
-      label: 'Username'
-    basic_auth_password:
+      label: 'Credential provider'
+    credentials:
+      type: sequence
+      label: 'Credentials'
+      sequence:
+        type: mautic_api.settings.credentials.[%key]
+
+mautic_api.settings.credentials.config:
+  type: mapping
+  label: 'Mautic API credentials'
+  mapping:
+    username:
       type: string
-      label: 'Password'
+      label: 'Username key'
+    password:
+      type: string
+      label: 'Password key'
+
+mautic_api.settings.credentials.key:
+  type: mapping
+  label: 'Mautic API credentials with Key Module'
+  mapping:
+    username:
+      type: string
+      label: 'Username key'
+    password:
+      type: string
+      label: 'Password key'
+
+mautic_api.settings.credentials.multikey:
+  type: mapping
+  label: 'Mautic API credentials with Key Module (user/password keys)'
+  mapping:
+    user_password:
+      type: string
+      label: 'User/Password key'

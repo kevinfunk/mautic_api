@@ -3,16 +3,26 @@
 namespace Drupal\mautic_api;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Mautic\Auth\ApiAuth;
 use Mautic\MauticApi;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+/**
+ * Class MauticApiService
+ * @package Drupal\mautic_api
+ */
 class MauticApiService implements MauticApiServiceInterface {
 
   /**
-   * The immutable entity clone settings configuration entity.
-   *
+   * @var EntityTypeManagerInterface
+   *   The entity type manager.
+   */
+  protected $entityTypeManager;
+
+  /**
    * @var \Drupal\Core\Config\ImmutableConfig
+   *   The immutable entity clone settings configuration entity.
    */
   protected $config;
 
@@ -27,19 +37,69 @@ class MauticApiService implements MauticApiServiceInterface {
   protected $auth;
 
   /**
-   * InstallmentsManager constructor.
+   * MauticApiService constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param RequestStack $request_stack
+   *   The current request stack.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, RequestStack $request_stack) {
-    $this->config = $config_factory->get('mautic_api.settings');
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory, RequestStack $request_stack) {
+    $this->entityTypeManager = $entity_type_manager;
     $this->request = $request_stack->getCurrentRequest();
+    $this->config = $config_factory->get('mautic_api.settings');
+    $credentials = $this->getCredentials();
 
     $initAuth = new ApiAuth();
     $this->auth = $initAuth->newAuth([
-      'userName' => $this->config->get('basic_auth_username'),
-      'password' => $this->config->get('basic_auth_password')
+      'userName' => $credentials['username'],
+      'password' => $credentials['password']
     ], 'BasicAuth');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCredentials() {
+    $credential_provider = $this->config->get('credential_provider');
+
+    switch ($credential_provider) {
+      case 'config':
+        $username = $this->config['credentials']['config']['username'];
+        $password = $this->config['credentials']['config']['password'];
+        break;
+
+      case 'key':
+        /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
+        $storage = $this->entityTypeManager->getStorage('key');
+        /** @var \Drupal\key\KeyInterface $username_key */
+        if ($username_key = $storage->load($this->config['credentials']['key']['username'])) {
+          $username = $username_key->getKeyValue();
+        }
+        /** @var \Drupal\key\KeyInterface $password_key */
+        if ($password_key = $storage->load($this->config['credentials']['key']['password'])) {
+          $password = $password_key->getKeyValue();
+        }
+        break;
+
+      case 'multikey':
+        /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
+        $storage = \Drupal::entityTypeManager()->getStorage('key');
+        /** @var \Drupal\key\KeyInterface $username_key */
+        if ($user_password_key = $storage->load($this->config['credentials']['multikey']['user_password'])) {
+          if ($values = $user_password_key->getKeyValues()) {
+            $username = $values['username'];
+            $password = $values['password'];
+          }
+        }
+        break;
+    }
+    return [
+      'username' => $username,
+      'password' => $password
+    ];
   }
 
   /**
@@ -91,6 +151,8 @@ class MauticApiService implements MauticApiServiceInterface {
   }
 
   /**
+   * Small helper function to log mautic api errors.
+   *
    * @param $response
    */
   protected function logErrors($response) {

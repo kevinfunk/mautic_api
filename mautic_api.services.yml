@@ -1,4 +1,4 @@
 services:
   mautic_api:
     class: Drupal\mautic_api\MauticApiService
-    arguments: ['@config.factory', '@request_stack']
+    arguments: ['@entity_type.manager', '@config.factory', '@request_stack']

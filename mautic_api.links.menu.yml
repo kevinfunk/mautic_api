@@ -1,5 +1,5 @@
 mautic_api.settings:
   title: 'Mautic API settings'
   parent: system.admin_config_services
-  description: 'Mautic API settings page.'
+  description: 'Configure credentials and basic settings for mautic api.'
   route_name: mautic_api.settings
