@@ -67,8 +67,11 @@ class MauticApiService implements MauticApiServiceInterface {
 
     switch ($credential_provider) {
       case 'config':
-        $username = $this->config['credentials']['config']['username'];
-        $password = $this->config['credentials']['config']['password'];
+        $credentials = $this->config->get('credentials');
+        if (isset($credentials['config'])) {
+          $username = $credentials['config']['username'];
+          $password = $credentials['config']['password'];
+        }
         break;
 
       case 'key':
