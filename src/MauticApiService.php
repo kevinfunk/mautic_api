@@ -106,21 +106,33 @@ class MauticApiService implements MauticApiServiceInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Helper function to initiate connection with a Mautic instance.
+   *
+   * @param $endpoint
+   *
+   * @return \Mautic\Api\Api
+   * @throws \Mautic\Exception\ContextNotFoundException
    */
-  public function createContact($email, $data) {
+  private function initiateConnection($endpoint) {
     if (!$this->auth) {
       throw new \Exception("Mautic API not authorized.");
     }
     $api = new MauticApi();
-    $contact_api = $api->newApi('contacts', $this->auth, $this->config->get('base_url'));
+    return $api->newApi($endpoint, $this->auth, $this->config->get('base_url'));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createContact($email, $data) {
+    $connection = $this->initiateConnection('contacts');
 
     $contact_data = [
       'email' => $email,
       'ipAddress' => $this->request->getClientIp(),
     ];
 
-    $contact_fields = $contact_api->getFieldList();
+    $contact_fields = $connection->getFieldList();
     if (empty($contact_fields['errors'])) {
       foreach ($contact_fields as $contact_field) {
         $alias = $contact_field['alias'];
@@ -131,9 +143,9 @@ class MauticApiService implements MauticApiServiceInterface {
     }
 
     // Create the contact
-    $response = $contact_api->create($contact_data);
+    $response = $connection->create($contact_data);
     $this->logErrors($response);
-    if (isset($response[$contact_api->itemName()]) && $contact = $response[$contact_api->itemName()]) {
+    if (isset($response[$connection->itemName()]) && $contact = $response[$connection->itemName()]) {
       return $contact;
     }
     return FALSE;
@@ -143,14 +155,18 @@ class MauticApiService implements MauticApiServiceInterface {
    * {@inheritdoc}
    */
   public function sendEmailToContact($email_id, $contact_id, $parameters = []) {
-    if (!$this->auth) {
-      throw new \Exception("Mautic API not authorized.");
-    }
-    $api = new MauticApi();
-    $emails_api = $api->newApi('emails', $this->auth, $this->config->get('base_url'));
-    $response = $emails_api->sendToContact($email_id, $contact_id, $parameters);
+    $connection = $this->initiateConnection('emails');
+    $response = $connection->sendToContact($email_id, $contact_id, $parameters);
     $this->logErrors($response);
     return $response;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getList($endpoint) {
+    $connection = $this->initiateConnection($endpoint);
+    return $connection->getList();
   }
 
   /**

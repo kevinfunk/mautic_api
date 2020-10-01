@@ -35,4 +35,17 @@ interface MauticApiServiceInterface {
    */
   public function sendEmailToContact($email_id, $contact_id, $parameters = []);
 
+  /**
+   * Return an array of a Mautic API endpoint.
+   * Examples: forms, focus, segments, files.
+   *
+   * @param string $endpoint
+   *   The Mautic API endpoint to return.
+   *
+   * @return array
+   *   Returns an array of the Mautic API endpoint.
+   *
+   * @throws \Mautic\Exception\ContextNotFoundException
+   */
+  public function getList(string $endpoint);
 }
