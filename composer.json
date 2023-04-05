@@ -3,6 +3,7 @@
     "description": "Provides integration with the mautic api library.",
     "type": "drupal-module",
     "require": {
+        "cweagans/composer-patches": "^1.7",
         "mautic/api-library": "^2.14 || ^3.1"
     },
     "authors": [
@@ -10,5 +11,15 @@
             "name": "archnode",
             "email": "markus@signalonline.at"
         }
-    ]
+    ],
+    "extra": {
+        "composer-exit-on-patch-failure": true,
+        "enable-patching": true,
+        "patches": {
+            "mautic/api-library": {
+                "Upgrade from 3.0.0 to 3.1.0 issue with psr/log requirement | https://github.com/mautic/api-library/issues/273":
+                "https://www.drupal.org/files/issues/2023-04-05/mautic-api-library-upgrade-from-3.0.0-to-3.1.0-273.patch"
+            }
+        }
+    }
 }
